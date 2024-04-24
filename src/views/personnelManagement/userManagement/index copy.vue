@@ -26,7 +26,7 @@
 
       <el-table-column label="权限" show-overflow-tooltip>
         <template #default="{ row }">
-          <el-tag v-for="(item, index) in row.permissions_str" :key="index">
+          <el-tag v-for="(item, index) in row.permissions" :key="index">
             {{ item }}
           </el-tag>
         </template>
@@ -102,6 +102,7 @@
           save.mobile = row.mobile
           save.id = row.id
           save.permissions = row.permissions
+          alert(111)
           this.$refs['edit'].showEdit(save)
         } else {
           this.$refs['edit'].showEdit()

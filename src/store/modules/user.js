@@ -5,21 +5,23 @@
 
 import Vue from 'vue'
 import { getUserInfo, login, logout } from '@/api/user'
-import { getAccessToken, removeAccessToken, setAccessToken } from '@/utils/accessToken'
+import { getAccessToken, removeAccessToken, setAccessToken, getHash, setHash } from '@/utils/accessToken'
 import { resetRouter } from '@/router'
-import { title, tokenName } from '@/config'
-
+import { title, tokenName, headerHash } from '@/config'
+import { setRoutesToken, removeRoutesToken } from '@/utils/cookieFun'
 const state = () => ({
   accessToken: getAccessToken(),
   username: '',
   avatar: '',
   permissions: [],
+  hash: getHash(),
 })
 const getters = {
   accessToken: (state) => state.accessToken,
   username: (state) => state.username,
   avatar: (state) => state.avatar,
   permissions: (state) => state.permissions,
+  hash: (state) => state.hash,
 }
 const mutations = {
   setAccessToken(state, accessToken) {
@@ -35,6 +37,10 @@ const mutations = {
   setPermissions(state, permissions) {
     state.permissions = permissions
   },
+  setHash(state, hash) {
+    state.hash = hash
+    setHash(hash)
+  },
 }
 const actions = {
   setPermissions({ commit }, permissions) {
@@ -43,8 +49,14 @@ const actions = {
   async login({ commit }, userInfo) {
     const { data } = await login(userInfo)
     const accessToken = data[tokenName]
+    const hash = data[headerHash]
+    const routes = data['route']
+    if (routes != '') {
+      setRoutesToken(routes)
+    }
     if (accessToken) {
       commit('setAccessToken', accessToken)
+      commit('setHash', hash)
       const hour = new Date().getHours()
       const thisTime = hour < 8 ? '早上好' : hour <= 11 ? '上午好' : hour <= 13 ? '中午好' : hour < 18 ? '下午好' : '晚上好'
       Vue.prototype.$baseNotify(`欢迎登录${title}`, `${thisTime}！`)
@@ -70,7 +82,7 @@ const actions = {
     }
   },
   async logout({ dispatch }) {
-    await logout(state.accessToken)
+    //await logout(state.accessToken) 这个地方是调用后台退出登录的，如果需要可以打开
     await dispatch('resetAccessToken')
     await resetRouter()
   },
@@ -78,6 +90,7 @@ const actions = {
     commit('setPermissions', [])
     commit('setAccessToken', '')
     removeAccessToken()
+    removeRoutesToken() // 删除路由
   },
 }
 export default { state, getters, mutations, actions }

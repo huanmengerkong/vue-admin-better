@@ -1,10 +1,7 @@
-/**
- * @author https://vue-admin-beautiful.com （不想保留author可删除）
- * @description 路由拦截状态管理，目前两种模式：all模式与intelligence模式，其中partialRoutes是菜单暂未使用
- */
 import { asyncRoutes, constantRoutes } from '@/router'
 import { getRouterList } from '@/api/router'
 import { convertRouter, filterAsyncRoutes } from '@/utils/handleRoutes'
+import { getRoutesToken } from '@/utils/cookieFun'
 
 const state = () => ({
   routes: [],
@@ -19,6 +16,8 @@ const mutations = {
     state.routes = constantRoutes.concat(routes)
   },
   setAllRoutes(state, routes) {
+    console.log('-------------------')
+    console.log(routes)
     state.routes = constantRoutes.concat(routes)
   },
   setPartialRoutes(state, routes) {
@@ -33,11 +32,20 @@ const actions = {
     return finallyAsyncRoutes
   },
   async setAllRoutes({ commit }) {
-    let { data } = await getRouterList()
+    //let { data } = await getRouterList()
+    // 从登录的cookie 中获取
+    var str = getRoutesToken()
+    if (str == '') {
+      return accessRoutes
+    }
+    const data = JSON.parse(str)
     data.push({ path: '*', redirect: '/404', hidden: true })
     let accessRoutes = convertRouter(data)
     commit('setAllRoutes', accessRoutes)
     return accessRoutes
+  },
+  setAll({ commit }, accessRoutes) {
+    commit('setAllRoutes', accessRoutes)
   },
   setPartialRoutes({ commit }, accessRoutes) {
     commit('setPartialRoutes', accessRoutes)

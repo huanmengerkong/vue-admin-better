@@ -1,8 +1,6 @@
 <template>
   <div class="roleManagement-container">
-    <el-divider content-position="left">
-      演示环境仅做基础功能展示，若想实现不同角色的真实菜单配置，需将settings.js路由加载模式改为all模式，由后端全面接管路由渲染与权限控制
-    </el-divider>
+    <el-divider content-position="left">角色分配</el-divider>
     <vab-query-form>
       <vab-query-form-left-panel :span="12">
         <el-button icon="el-icon-plus" type="primary" @click="handleEdit">添加</el-button>
@@ -22,8 +20,15 @@
 
     <el-table v-loading="listLoading" :data="list" :element-loading-text="elementLoadingText" @selection-change="setSelectRows">
       <el-table-column show-overflow-tooltip type="selection" />
-      <el-table-column label="id" prop="id" show-overflow-tooltip />
-      <el-table-column label="权限码" prop="permission" show-overflow-tooltip />
+      <el-table-column label="Key" prop="key" show-overflow-tooltip />
+      <el-table-column label="角色名称" prop="role_name" show-overflow-tooltip />
+      <el-table-column label="权限" prop="permission_str" show-overflow-tooltip />
+      <el-table-column label="状态" prop="status" show-overflow-tooltip>
+        <template #default="{ row }">
+          <el-tag v-if="row.status === 1" type="success">启用</el-tag>
+          <el-tag v-else type="danger">禁用</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" show-overflow-tooltip width="200">
         <template #default="{ row }">
           <el-button type="text" @click="handleEdit(row)">编辑</el-button>
@@ -33,9 +38,9 @@
     </el-table>
     <el-pagination
       background
-      :current-page="queryForm.pageNo"
+      :current-page="queryForm.page"
       :layout="layout"
-      :page-size="queryForm.pageSize"
+      :page-size="queryForm.size"
       :total="total"
       @current-change="handleCurrentChange"
       @size-change="handleSizeChange"
@@ -45,14 +50,14 @@
 </template>
 
 <script>
-  import { doDelete, getList } from '@/api/roleManagement'
+  import { doDelete, getList, getRoute } from '@/api/roleManagement'
   import Edit from './components/RoleManagementEdit'
-
   export default {
     name: 'RoleManagement',
     components: { Edit },
     data() {
       return {
+        permissionList: [],
         list: null,
         listLoading: true,
         layout: 'total, sizes, prev, pager, next, jumper',
@@ -60,8 +65,8 @@
         selectRows: '',
         elementLoadingText: '正在加载...',
         queryForm: {
-          pageNo: 1,
-          pageSize: 10,
+          page: 1,
+          size: 10,
           permission: '',
         },
         timeOutID: null,
@@ -88,15 +93,17 @@
       handleDelete(row) {
         if (row.id) {
           this.$baseConfirm('你确定要删除当前项吗', null, async () => {
-            const { msg } = await doDelete({ ids: row.id })
+            const req = []
+            req.push(row.id)
+            const { msg } = await doDelete({ ids: req })
             this.$baseMessage(msg, 'success')
             this.fetchData()
           })
         } else {
           if (this.selectRows.length > 0) {
-            const ids = this.selectRows.map((item) => item.id).join()
+            const req = this.selectRows.map((item) => item.id)
             this.$baseConfirm('你确定要删除选中项吗', null, async () => {
-              const { msg } = await doDelete({ ids })
+              const { msg } = await doDelete({ ids: req })
               this.$baseMessage(msg, 'success')
               this.fetchData()
             })
@@ -107,22 +114,23 @@
         }
       },
       handleSizeChange(val) {
-        this.queryForm.pageSize = val
+        this.queryForm.size = val
         this.fetchData()
       },
       handleCurrentChange(val) {
-        this.queryForm.pageNo = val
+        this.queryForm.page = val
         this.fetchData()
       },
       queryData() {
-        this.queryForm.pageNo = 1
+        this.queryForm.page = 1
         this.fetchData()
       },
       async fetchData() {
         this.listLoading = true
-        const { data, totalCount } = await getList(this.queryForm)
-        this.list = data
-        this.total = totalCount
+        const res = await getList(this.queryForm)
+        console.log(res)
+        this.list = res.data.list
+        this.total = res.data.count
         this.timeOutID = setTimeout(() => {
           this.listLoading = false
         }, 300)

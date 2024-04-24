@@ -1,8 +1,9 @@
 import request from '@/utils/request'
 
-export function getPublicKey() {
+export function getPublicKey(data) {
   return request({
     url: '/publicKey',
     method: 'post',
+    data,
   })
 }

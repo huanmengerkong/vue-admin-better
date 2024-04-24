@@ -8,7 +8,7 @@ module.exports = [
   {
     url: '/publicKey',
     type: 'post',
-    response() {
+    response(data) {
       return {
         code: 200,
         msg: 'success',
@@ -50,7 +50,7 @@ module.exports = [
     },
   },
   {
-    url: '/userInfo',
+    url: '/admin/info',
     type: 'post',
     response(config) {
       const { accessToken } = config.body

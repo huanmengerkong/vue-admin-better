@@ -1,18 +1,7 @@
 <template>
   <div class="menuManagement-container">
-    <el-divider content-position="left">
-      演示环境仅做基础功能展示，若想实现不同角色的真实菜单配置，需将settings.js路由加载模式改为all模式，由后端全面接管路由渲染与权限控制
-    </el-divider>
     <el-row>
-      <el-col :lg="4" :md="8" :sm="24" :xl="4" :xs="24">
-        <el-tree :data="data" :default-expanded-keys="['root']" node-key="id" :props="defaultProps" @node-click="handleNodeClick" />
-      </el-col>
-      <el-col :lg="20" :md="16" :sm="24" :xl="20" :xs="24">
-        <vab-query-form>
-          <vab-query-form-top-panel :span="12">
-            <el-button icon="el-icon-plus" type="primary" @click="handleEdit">添加</el-button>
-          </vab-query-form-top-panel>
-        </vab-query-form>
+      <el-col :lg="50" :md="56" :sm="54" :xl="50" :xs="54">
         <el-table
           v-loading="listLoading"
           border
@@ -22,22 +11,22 @@
           row-key="path"
           :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
         >
-          <el-table-column label="name" prop="name" show-overflow-tooltip />
-          <el-table-column label="路径" prop="path" show-overflow-tooltip />
-          <el-table-column label="是否隐藏" show-overflow-tooltip>
+          <el-table-column label="name" :min-width="100" prop="name" show-overflow-tooltip />
+          <el-table-column label="路径" :min-width="120" prop="path" show-overflow-tooltip />
+          <!-- <el-table-column label="是否隐藏" show-overflow-tooltip>
             <template #default="{ row }">
               <span>
                 {{ row.hidden ? '是' : '否' }}
               </span>
             </template>
-          </el-table-column>
-          <el-table-column label="是否一直显示当前节点" show-overflow-tooltip>
+          </el-table-column> -->
+          <!-- <el-table-column label="是否一直显示当前节点" show-overflow-tooltip>
             <template #default="{ row }">
               <span>
                 {{ row.alwaysShow ? '是' : '否' }}
               </span>
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="vue文件路径" prop="component" show-overflow-tooltip />
           <el-table-column label="重定向" prop="redirect" show-overflow-tooltip />
           <el-table-column label="标题" prop="meta.title" show-overflow-tooltip />
@@ -46,6 +35,18 @@
               <span v-if="row.meta">
                 <vab-icon v-if="row.meta.icon" :icon="['fas', row.meta.icon]" />
               </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="是否菜单" show-overflow-tooltip>
+            <template #default="{ row }">
+              <span v-if="row.menu == 1">是</span>
+              <span v-else>否</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="是否禁用" show-overflow-tooltip>
+            <template #default="{ row }">
+              <span v-if="row.status == 1">是</span>
+              <span v-else>否</span>
             </template>
           </el-table-column>
           <el-table-column label="是否固定" show-overflow-tooltip>
@@ -69,7 +70,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" show-overflow-tooltip width="200">
+          <el-table-column label="操作" show-overflow-tooltip width="100">
             <template #default="{ row }">
               <el-button type="text" @click="handleEdit(row)">编辑</el-button>
               <el-button type="text" @click="handleDelete(row)">删除</el-button>
@@ -105,8 +106,6 @@
       }
     },
     async created() {
-      const roleData = await getTree()
-      this.data = roleData.data
       this.fetchData()
     },
 
@@ -132,9 +131,339 @@
       },
       async fetchData() {
         this.listLoading = true
-
-        const { data } = await getList()
-        this.list = data
+        var req = {}
+        req.page = 1
+        req.size = 10000
+        const datas = await getList(req)
+        console.log('------------------------')
+        console.log(datas)
+        const data = []
+        this.list = [
+          {
+            path: '/',
+            component: 'Layout',
+            redirect: 'index',
+            children: [
+              {
+                path: 'index',
+                name: 'Index',
+                component: '@views/index/index',
+                meta: {
+                  title: '首页',
+                  icon: 'home',
+                  affix: true,
+                },
+              },
+            ],
+          },
+          {
+            path: '/personnelManagement',
+            component: 'Layout',
+            redirect: 'noRedirect',
+            name: 'PersonnelManagement',
+            meta: {
+              title: '人员',
+              icon: 'users-cog',
+              permissions: ['admin'],
+            },
+            children: [
+              {
+                path: 'userManagement',
+                name: 'UserManagement',
+                component: '@views/personnelManagement/userManagement/index',
+                meta: {
+                  title: '用户管理',
+                },
+              },
+              {
+                path: 'roleManagement',
+                name: 'RoleManagement',
+                component: '@views/personnelManagement/roleManagement/index',
+                meta: {
+                  title: '角色管理',
+                },
+              },
+              {
+                path: 'menuManagement',
+                name: 'MenuManagement',
+                component: '@views/personnelManagement/menuManagement/index',
+                meta: {
+                  title: '菜单管理',
+                  badge: 'New',
+                },
+              },
+            ],
+          },
+          {
+            path: '/vab',
+            component: 'Layout',
+            redirect: 'noRedirect',
+            name: 'Vab',
+            alwaysShow: true,
+            meta: {
+              title: '组件',
+              icon: 'cloud',
+            },
+            children: [
+              {
+                path: 'permissions',
+                name: 'Permission',
+                component: '@views/vab/permissions/index',
+                meta: {
+                  title: '权限控制',
+                  permissions: ['admin', 'editor'],
+                  badge: 'New',
+                },
+              },
+              {
+                path: 'icon',
+                component: 'EmptyLayout',
+                redirect: 'noRedirect',
+                name: 'Icon',
+                meta: {
+                  title: '图标',
+                  permissions: ['admin'],
+                },
+                children: [
+                  {
+                    path: 'awesomeIcon',
+                    name: 'AwesomeIcon',
+                    component: '@views/vab/icon/index',
+                    meta: {
+                      title: '常规图标',
+                    },
+                  },
+                  {
+                    path: 'colorfulIcon',
+                    name: 'ColorfulIcon',
+                    component: '@views/vab/icon/colorfulIcon',
+                    meta: {
+                      title: '多彩图标',
+                    },
+                  },
+                ],
+              },
+              {
+                path: 'table',
+                component: '@views/vab/table/index',
+                name: 'Table',
+                meta: {
+                  title: '表格',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'map',
+                name: 'Map',
+                component: '@views/vab/map/index',
+                meta: {
+                  title: '地图',
+                  permissions: ['admin'],
+                  badge: 'Pro',
+                },
+              },
+              {
+                path: 'webSocket',
+                name: 'WebSocket',
+                component: '@views/vab/webSocket/index',
+                meta: {
+                  title: 'webSocket',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'form',
+                name: 'Form',
+                component: '@views/vab/form/index',
+                meta: {
+                  title: '表单',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'element',
+                name: 'Element',
+                component: '@views/vab/element/index',
+                meta: {
+                  title: '常用组件',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'tree',
+                name: 'Tree',
+                component: '@views/vab/tree/index',
+                meta: {
+                  title: '树',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'verify',
+                name: 'Verify',
+                component: '@views/vab/verify/index',
+                meta: {
+                  title: '验证码',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'menu1',
+                component: '@views/vab/nested/menu1/index',
+                name: 'Menu1',
+                alwaysShow: true,
+                meta: {
+                  title: '嵌套路由 1',
+                  permissions: ['admin'],
+                },
+                children: [
+                  {
+                    path: 'menu1-1',
+                    name: 'Menu1-1',
+                    alwaysShow: true,
+                    meta: {
+                      title: '嵌套路由 1-1',
+                    },
+                    component: '@views/vab/nested/menu1/menu1-1/index',
+                    children: [
+                      {
+                        path: 'menu1-1-1',
+                        name: 'Menu1-1-1',
+                        meta: {
+                          title: '嵌套路由 1-1-1',
+                        },
+                        component: '@views/vab/nested/menu1/menu1-1/menu1-1-1/index',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                path: 'loading',
+                name: 'Loading',
+                component: '@views/vab/loading/index',
+                meta: {
+                  title: 'loading',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'backToTop',
+                name: 'BackToTop',
+                component: '@views/vab/backToTop/index',
+                meta: {
+                  title: '返回顶部',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'lodash',
+                name: 'Lodash',
+                component: '@views/vab/lodash/index',
+                meta: {
+                  title: 'lodash',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'smallComponents',
+                name: 'SmallComponents',
+                component: '@views/vab/smallComponents/index',
+                meta: {
+                  title: '小组件',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'upload',
+                name: 'Upload',
+                component: '@views/vab/upload/index',
+                meta: {
+                  title: '上传',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'log',
+                name: 'Log',
+                component: '@views/vab/errorLog/index',
+                meta: {
+                  title: '错误日志模拟',
+                  permissions: ['admin'],
+                },
+              },
+              {
+                path: 'more',
+                name: 'More',
+                component: '@views/vab/more/index',
+                meta: {
+                  title: '关于',
+                  permissions: ['admin'],
+                },
+              },
+            ],
+          },
+          {
+            path: '/mall',
+            component: 'Layout',
+            redirect: 'noRedirect',
+            name: 'Mall',
+            meta: {
+              title: '商城',
+              icon: 'shopping-cart',
+              permissions: ['admin'],
+            },
+            children: [
+              {
+                path: 'pay',
+                name: 'Pay',
+                component: '@views/mall/pay/index',
+                meta: {
+                  title: '支付',
+                  noKeepAlive: true,
+                },
+                children: null,
+              },
+              {
+                path: 'goodsList',
+                name: 'GoodsList',
+                component: '@views/mall/goodsList/index',
+                meta: {
+                  title: '商品列表',
+                },
+              },
+            ],
+          },
+          {
+            path: '/error',
+            component: 'EmptyLayout',
+            redirect: 'noRedirect',
+            name: 'Error',
+            meta: {
+              title: '错误页',
+              icon: 'bug',
+            },
+            children: [
+              {
+                path: '401',
+                name: 'Error401',
+                component: '@views/401',
+                meta: {
+                  title: '401',
+                },
+              },
+              {
+                path: '404',
+                name: 'Error404',
+                component: '@views/404',
+                meta: {
+                  title: '404',
+                },
+              },
+            ],
+          },
+        ]
+        this.list = datas.data.Route
         this.timeOutID = setTimeout(() => {
           this.listLoading = false
         }, 300)

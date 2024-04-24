@@ -10,6 +10,8 @@ import {
   requestTimeout,
   successCode,
   tokenName,
+  headerTokenName,
+  headerHash,
 } from '@/config'
 import store from '@/store'
 import qs from 'qs'
@@ -53,7 +55,10 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     if (store.getters['user/accessToken']) {
-      config.headers[tokenName] = store.getters['user/accessToken']
+      config.headers[headerTokenName] = store.getters['user/accessToken']
+    }
+    if (store.getters['user/hash']) {
+      config.headers[headerHash] = store.getters['user/hash']
     }
     //这里会过滤所有为空、0、false的key，如果不需要请自行注释
     if (config.data) config.data = Vue.prototype.$baseLodash.pickBy(config.data, Vue.prototype.$baseLodash.identity)
@@ -70,7 +75,6 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => {
     if (loadingInstance) loadingInstance.close()
-
     const { data, config } = response
     const { code, msg } = data
     // 操作正常Code数组
@@ -81,7 +85,7 @@ instance.interceptors.response.use(
     } else {
       handleCode(code, msg)
       return Promise.reject(
-        `vue-admin-beautiful请求异常拦截:${JSON.stringify({
+        `请求异常拦截:${JSON.stringify({
           url: config.url,
           code,
           msg,

@@ -23,3 +23,11 @@ export function doDelete(data) {
     data,
   })
 }
+
+export function getRoute(data) {
+  return request({
+    url: '/permission/tree',
+    method: 'post',
+    data,
+  })
+}

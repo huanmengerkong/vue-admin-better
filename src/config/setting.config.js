@@ -35,7 +35,11 @@ const setting = {
   //加载时显示文字
   loadingText: '正在加载中...',
   //token名称
-  tokenName: 'accessToken',
+  tokenName: 'token',
+  //token 头名称
+  headerTokenName: 'X-Token',
+  // 头hash
+  headerHash: 'hash',
   //token在localStorage、sessionStorage存储的key的名称
   tokenTableName: 'vue-admin-beautiful-2021',
   //token存储位置localStorage sessionStorage
@@ -49,9 +53,9 @@ const setting = {
   //是否开启登录拦截
   loginInterception: true,
   //是否开启登录RSA加密
-  loginRSA: true,
+  loginRSA: false,
   //intelligence和all两种方式，前者后端权限只控制permissions不控制view文件的import（前后端配合，减轻后端工作量），all方式完全交给后端前端只负责加载
-  authentication: 'intelligence',
+  authentication: 'all',
   //vertical布局时是否只保持一个子菜单的展开
   uniqueOpened: true,
   //vertical布局时默认展开的菜单path，使用逗号隔开建议只展开一个

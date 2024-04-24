@@ -112,8 +112,12 @@
         location.reload()
       },
       async fetchData() {
-        const res = await getRouterList()
-        this.tableData = res.data
+        var req = {}
+        req.page = 1
+        req.size = 10000
+        const res = await getRouterList(req)
+        alert(111)
+        this.tableData = res.data.Route
         this.res = res
       },
     },

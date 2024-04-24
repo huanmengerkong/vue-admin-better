@@ -3,6 +3,7 @@ import { encryptedData } from '@/utils/encrypt'
 import { loginRSA, tokenName } from '@/config'
 
 export async function login(data) {
+  console.log(data.username)
   if (loginRSA) {
     data = await encryptedData(data)
   }
@@ -15,7 +16,7 @@ export async function login(data) {
 
 export function getUserInfo(accessToken) {
   return request({
-    url: '/userInfo',
+    url: '/admin/info',
     method: 'post',
     data: {
       [tokenName]: accessToken,

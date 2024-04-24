@@ -1,11 +1,6 @@
 <template>
   <div class="login-container">
-    <el-alert
-      :closable="false"
-      style="position: fixed"
-      title="beautiful boys and girls欢迎加入vue-admin-beautifulQQ群：972435319"
-      type="success"
-    />
+    <!-- <el-alert :closable="true" style="position: fixed" title="study" type="success" /> -->
     <el-row>
       <el-col :lg="16" :md="12" :sm="24" :xl="16" :xs="24">
         <div style="color: transparent">占位符</div>
@@ -14,11 +9,11 @@
         <el-form ref="form" class="login-form" label-position="left" :model="form" :rules="rules">
           <div class="title">hello !</div>
           <div class="title-tips">欢迎来到{{ title }}！</div>
-          <el-form-item prop="username" style="margin-top: 40px">
+          <el-form-item prop="name" style="margin-top: 40px">
             <span class="svg-container svg-container-admin">
               <vab-icon :icon="['fas', 'user']" />
             </span>
-            <el-input v-model.trim="form.username" v-focus placeholder="请输入用户名" tabindex="1" type="text" />
+            <el-input v-model.trim="form.name" v-focus placeholder="请输入用户名" tabindex="1" type="text" />
           </el-form-item>
           <el-form-item prop="password">
             <span class="svg-container">
@@ -52,6 +47,7 @@
 
 <script>
   import { isPassword } from '@/utils/validate'
+  import md5 from 'js-md5'
 
   export default {
     name: 'Login',
@@ -63,7 +59,7 @@
       },
     },
     data() {
-      const validateusername = (rule, value, callback) => {
+      const validatename = (rule, value, callback) => {
         if ('' == value) {
           callback(new Error('用户名不能为空'))
         } else {
@@ -81,15 +77,15 @@
         nodeEnv: process.env.NODE_ENV,
         title: this.$baseTitle,
         form: {
-          username: '',
+          name: '',
           password: '',
         },
         rules: {
-          username: [
+          name: [
             {
               required: true,
               trigger: 'blur',
-              validator: validateusername,
+              validator: validatename,
             },
           ],
           password: [
@@ -122,7 +118,7 @@
       clearTimeout(this.timeOutID)
     },
     mounted() {
-      this.form.username = 'admin'
+      this.form.name = 'admin'
       this.form.password = '123456'
       this.timeOutID = setTimeout(() => {
         this.handleLogin()
@@ -138,9 +134,11 @@
       handleLogin() {
         this.$refs.form.validate((valid) => {
           if (valid) {
+            var s = this.form
+            s.password = md5.md5(this.form.password)
             this.loading = true
             this.$store
-              .dispatch('user/login', this.form)
+              .dispatch('user/login', s)
               .then(() => {
                 const routerPath = this.redirect === '/404' || this.redirect === '/401' ? '/' : this.redirect
                 this.$router.push(routerPath).catch(() => {})

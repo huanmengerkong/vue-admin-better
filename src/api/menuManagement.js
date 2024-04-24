@@ -9,6 +9,7 @@ export function getTree(data) {
 }
 
 export function doEdit(data) {
+  console.log(data)
   return request({
     url: '/menuManagement/doEdit',
     method: 'post',

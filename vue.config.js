@@ -55,6 +55,16 @@ module.exports = {
       warnings: true,
       errors: true,
     },
+    proxy: {
+      '': {
+        target: 'http://127.0.0.1:8001',
+        changeOrigin: true,
+        // pathRewrite: {
+        //   '^/api': ''
+        //   //['^'+process.env.VUE_APP_BASE_API]:''
+        // }
+      },
+    },
     after: mockServer(),
   },
   configureWebpack() {
