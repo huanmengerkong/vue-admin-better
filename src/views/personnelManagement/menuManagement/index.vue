@@ -2,6 +2,11 @@
   <div class="menuManagement-container">
     <el-row>
       <el-col :lg="50" :md="56" :sm="54" :xl="50" :xs="54">
+        <vab-query-form>
+          <vab-query-form-top-panel :span="12">
+            <el-button icon="el-icon-plus" type="primary" @click="handleEdit">添加</el-button>
+          </vab-query-form-top-panel>
+        </vab-query-form>
         <el-table
           v-loading="listLoading"
           border

@@ -82,7 +82,9 @@
     name: 'MenuManagementEdit',
     data() {
       return {
-        form: {},
+        form: {
+          pid: 0,
+        },
         rules: {
           id: [{ required: true, trigger: 'blur', message: '请输入路径' }],
         },
@@ -104,6 +106,7 @@
       // 点击叶子节点
       selectTreeNodeClick(data, node, el) {
         this.form.parent_id = data.id
+        this.form.pid = data.id
         //if (data.rank >= this.selectLevel) {
         this.singleSelectTreeVal = data.name
         this.singleSelectTreeKey = data.id
