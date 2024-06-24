@@ -468,7 +468,7 @@
       }
     },
     created() {
-      this.fetchData()
+      //this.fetchData()
     },
     beforeDestroy() {
       clearInterval(this.timer)
